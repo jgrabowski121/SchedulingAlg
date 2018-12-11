@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		FD802B1521BDF6D400DC89B8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD802B1421BDF6D400DC89B8 /* main.cpp */; };
 		FD802B1D21BE031E00DC89B8 /* Job.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD802B1B21BE031E00DC89B8 /* Job.cpp */; };
+		FD802B3621C0223C00DC89B8 /* algorithmCompare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD802B3421C0223C00DC89B8 /* algorithmCompare.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +29,8 @@
 		FD802B1421BDF6D400DC89B8 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		FD802B1B21BE031E00DC89B8 /* Job.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Job.cpp; sourceTree = "<group>"; };
 		FD802B1C21BE031E00DC89B8 /* Job.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Job.hpp; sourceTree = "<group>"; };
+		FD802B3421C0223C00DC89B8 /* algorithmCompare.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = algorithmCompare.cpp; sourceTree = "<group>"; };
+		FD802B3521C0223C00DC89B8 /* algorithmCompare.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = algorithmCompare.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +66,8 @@
 				FD802B1421BDF6D400DC89B8 /* main.cpp */,
 				FD802B1B21BE031E00DC89B8 /* Job.cpp */,
 				FD802B1C21BE031E00DC89B8 /* Job.hpp */,
+				FD802B3421C0223C00DC89B8 /* algorithmCompare.cpp */,
+				FD802B3521C0223C00DC89B8 /* algorithmCompare.hpp */,
 			);
 			path = SchedulingAlg;
 			sourceTree = "<group>";
@@ -123,6 +128,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD802B3621C0223C00DC89B8 /* algorithmCompare.cpp in Sources */,
 				FD802B1521BDF6D400DC89B8 /* main.cpp in Sources */,
 				FD802B1D21BE031E00DC89B8 /* Job.cpp in Sources */,
 			);

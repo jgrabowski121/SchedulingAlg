@@ -39,7 +39,9 @@
 #include <string>
 #include <chrono>
 #include <queue>
+#include <iomanip>
 #include "Job.hpp"
+#include "algorithmCompare.hpp"
 
 int main(int argc, const char * argv[]) {
     
@@ -93,6 +95,11 @@ int main(int argc, const char * argv[]) {
 
         }
 
+        
+    //-------------------------------------------------------------------------------
+    //***************************** RUN FCFS TEST **********************************|
+    //-------------------------------------------------------------------------------
+        
         //Calculate the wait times
         for(size_t i = 0; i < jobsVector.size(); ++i)
         {
@@ -101,21 +108,20 @@ int main(int argc, const char * argv[]) {
                 jobsVector[i]._waitingTime += jobsVector[j]._burstTime;
         }
         
-    //-------------------------------------------------------------------------------
-    //***************************** RUN FCFS TEST **********************************|
-    //-------------------------------------------------------------------------------
-        
         if(input == 1)
         {
             //Print the vectors contents
             for (auto i = jobsVector.begin(); i != jobsVector.end(); ++i)
             {
                 std::cout << i->_processName
+                << std::setw(8)
                 << "\tBurst Time: " << i->_burstTime
+                << std::setw(16)
                 << "\tPriority: " << i->_priority
+                << std::setw(22)
                 << "\tArrival Time: " << i->_arrivalTime
+                << std::setw(18)
                 << "\tWaiting Time: " << i->_waitingTime << std::endl;
-                //jobsVector.pop_back();
             }
             
             //Calculate the average waiting time
@@ -224,9 +230,13 @@ int main(int argc, const char * argv[]) {
             for (auto i = RRVector.begin(); i != RRVector.end(); ++i)
             {
                 std::cout << i->_processName
+                << std::setw(8)
                 << "\tBurst Time: " << i->_burstTime
+                << std::setw(16)
                 << "\tPriority: " << i->_priority
+                << std::setw(22)
                 << "\tArrival Time: " << i->_arrivalTime
+                << std::setw(18)
                 << "\tWaiting Time: " << i->_waitingTime << std::endl;
             }
             
@@ -242,6 +252,13 @@ int main(int argc, const char * argv[]) {
             
             std::cout << "\n\nAverage Wait Time: " << avgRRTime << "\n\n";
         }
+        if (input == 3)
+        {
+            runCompare();
+        }
+        std::cout << "\n-------------------------------------------------------------------\n";
+        std::cout << "|******************************************************************|\n";
+        std::cout << "-------------------------------------------------------------------\n\n";
     }
     return 0;
 }
