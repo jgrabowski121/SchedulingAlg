@@ -50,8 +50,8 @@ int main(int argc, const char * argv[]) {
         std::vector<Job> jobsVector;
         std::vector<Job> RRVector;
         std::cout << "Welcome to Justin's cpu scheduler from hell\n\n";
-        unsigned short input;
-        std::cout << "Plesase enter your selection (1= FCFS: 2= RR: 3= Compare) or 0 to quit:\t";
+        unsigned short input = 0;
+        std::cout << "Please enter your selection (1= FCFS: 2= RR: 3= Compare) or 0 to quit:\t";
         
         while(!(std::cin>>input))
         {
@@ -62,11 +62,16 @@ int main(int argc, const char * argv[]) {
             std::cin.ignore(1000, '\n');
             std::cout << "Please enter a valid entry (1= FCFS: 2= RR: 3= Compare) or 0 to quit:\t";
         }
-        
         if (std::cin.eof())
-            std::cout << "No value eneterd\n";
+        {
+            std::cout << "No value enterd\n";
+            break;
+        }
         if (std::cin.bad())
+        {
             std::cout<< "Input steam is bad\n";
+            break;
+        }
         
         if (input < 0 || input > 3)
             std::cout << "Invalid entry\n";
