@@ -196,94 +196,61 @@ int main(int argc, const char * argv[]) {
                 arrivalT[i] = RRVector[i]._arrivalTime;
             }
             
-
-            int t_total = 0;
-            while(true)
+            //create burst checker thingy
+            int burstTime[RRVector.size()];
+            unsigned arrivalTime[RRVector.size()];
+            for(size_t i = 0; i < RRVector.size(); i++)
             {
-                bool finnished = true;
-                for(size_t i = 0; i < RRVector.size(); i++)
-                {
-                    // **This job has not arrived yet**
-                    if (arrivalT[i] > t_total)
-                    {
-                        t_total++;
-                        i--;
-                    }
-                    //Process jobs that have arrived
-                    else if (arrivalT[i] <= t_total)
-                    {
-                        if (arrivalT[i] > cputimeQuantum)
-                        {
-                            for (size_t j = 0; j < RRVector.size(); j++)
-                            {
-                                if (arrivalT[j] < arrivalT[i])
-                                {
-                                    if(burstT[j] > 0)
-                                    {
-                                        finnished = false;
-                                        if (burstT[j] > cputimeQuantum)
-                                        {
-                                            t_total = t_total + cputimeQuantum;
-                                            burstT[j] = burstT[j] - cputimeQuantum;
-                                            arrivalT[j] = arrivalT[j] + cputimeQuantum;
-                                        }
-                                        else
-                                        {
-                                            t_total = t_total + burstT[j];
-                                            RRVector[j]._waitingTime = t_total - burstT[j] - arrivalT[j];
-                                            burstT[j] = 0;
-                                        }
-                                    }
-                                }
-                            }
-                            if (burstT[i] > 0)
-                            {
-                                finnished = false;
-                                if (burstT[i] > cputimeQuantum)
-                                {
-                                    t_total = t_total + cputimeQuantum;
-                                    burstT[i] = burstT[i] - cputimeQuantum;
-                                    arrivalT[i] = arrivalT[i] + cputimeQuantum;
-                                }
-                                else
-                                {
-                                    t_total = t_total + burstT[i];
-                                    RRVector[i]._waitingTime = t_total
-                                    - RRVector[i]._burstTime - RRVector[i]._arrivalTime;
-                                    burstT[i] = 0;
-                                }
-                            }
-                        }
-                        // These jobs can be done because they have arrived during the
-                        // quantums time frame
-                        else if(arrivalT[i] <= cputimeQuantum)
-                        {
-                            if (burstT[i] > 0)
-                            {
-                                finnished = false; // there are more jobs to complete
-                                if(burstT[i] > cputimeQuantum) // This process will not be complete after this iiteration
-                                {
-                                    t_total += cputimeQuantum; //add the quantum duration
-                                    burstT[i] = burstT[i] - cputimeQuantum; // Subtract this cpu quantum from the burtTime remaining
-                                    arrivalT[i] = arrivalT[i] + cputimeQuantum;
-                                }
-                                else
-                                {
-                                    t_total += burstT[i];
-                                    RRVector[i]._waitingTime = t_total - RRVector[i]._burstTime -
-                                    RRVector[i]._arrivalTime;
-                                    burstT[i] = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-                if(finnished)
-                    break;
-                
+                burstTime[i] = RRVector[i]._burstTime;
+                arrivalTime[i] = RRVector[i]._arrivalTime;
             }
             
             
+            int processTime = 0;
+            int totalWaitingTime = 0;
+            while(true)
+            {
+                bool done = true;
+                size_t count = RRVector.size()-1;
+                for(size_t i = 0; i < RRVector.size(); i++, count--)
+                {
+                    //If arival_time > processTime
+                    if (arrivalTime[i] > processTime)
+                    {
+                        if(count == 0) //No jobs were ready
+                        {
+                            processTime ++; //Increase the time
+                            done = false;
+                        }
+                        else
+                        {
+                            done = false;
+                        }
+                        //goto next job (i++)
+                    }
+                    else if (burstTime[i] > 0)
+                    {
+                        burstTime[i] = burstTime[i] - cputimeQuantum;
+                        if (burstTime[i] <= 0)
+                        {
+                            processTime += RRVector[i]._burstTime + burstTime[i];
+                            totalRRWaitTime += RRVector[i]._burstTime + burstTime[i];
+                            RRVector[i]._waitingTime += totalWaitingTime - arrivalTime[i];
+                            if (RRVector[i]._waitingTime < 0)
+                                RRVector[i]._waitingTime = 0;
+                        }
+                        else
+                        {
+                            done = false;
+                            processTime += cputimeQuantum;
+                            totalWaitingTime += cputimeQuantum;
+                        }
+                    }
+                }
+                if(done)
+                    break;
+            }
+
             //Print table header
             std::cout.flags(std::ios::left);
             std::cout << std::setw(18) << "Process"
@@ -324,7 +291,6 @@ int main(int argc, const char * argv[]) {
             std::cout << "\n\nAverage Wait Time: " << avgRRTime << "\n\n";
         }
     
-
         if (input == 3)
         {
             runCompare();
