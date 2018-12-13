@@ -17,17 +17,19 @@
 #include <queue>
 #include "Job.hpp"
 
+
+//Creating the onject to hold processes
 struct Job
 {
     //Constructor
-    Job(std::string processName,unsigned burstTime,
+    Job(std::string processName,int burstTime,
         unsigned short priority, unsigned arrivalTime);
     
     std::string _processName;
-    unsigned _burstTime;
+    int _burstTime;
     unsigned short _priority;
     unsigned _arrivalTime;
-    unsigned _waitingTime;
+    int _waitingTime;
     unsigned short getPriority() const;
 };
 

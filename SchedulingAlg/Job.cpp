@@ -14,7 +14,8 @@
 #include <queue>
 #include "Job.hpp"
 
-Job::Job(std::string processName, unsigned burstTime,
+//Constructor
+Job::Job(std::string processName, int burstTime,
          unsigned short priority, unsigned arrivalTime)
 {
     _processName = processName;
@@ -24,13 +25,5 @@ Job::Job(std::string processName, unsigned burstTime,
     _waitingTime = 0;
 };
 
-unsigned short Job::getPriority() const
-{
-    return _priority;
-}
 
-bool operator <(const Job &lhs, const Job &rhs)
-{
-    return lhs.getPriority() < rhs.getPriority();
-}
 

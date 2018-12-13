@@ -88,46 +88,77 @@ int main(int argc, const char * argv[]) {
      
         srand((unsigned)time(0));
 
-        //Generating random "Jobs"
-        for(size_t i = 0; i < 10; i++)
+        
+        std::vector<int> arrivalTimes;
+        //Generating and sorting arrival times
+        for(size_t i = 0; i< 5; i++)
         {
-            
-            std::string jobName = "P" + std::to_string(i);
-            
-            //jobs.push(Job(jobName, std::rand()%10 , std::rand()%5, time(0) + std::rand()%10));
-            
-            jobsVector.push_back(Job(jobName, std::rand()%10 , std::rand()%5, std::rand()%10));
-
+            if(i == 0)
+                arrivalTimes.push_back(0);
+            arrivalTimes.push_back(std::rand()%20);
         }
-
+        std::sort(arrivalTimes.begin(), arrivalTimes.end());
+        
+        
+        //Generating random "Jobs"
+        for(size_t i = 0; i < 5; i++)
+        {
+            std::string jobName = "P" + std::to_string(i);
+            jobsVector.push_back(Job(jobName, 1 + std::rand()%10 , 1 + std::rand()%10, arrivalTimes[i]));
+            
+        }
+        
+        RRVector = jobsVector;
         
     //-------------------------------------------------------------------------------
     //***************************** RUN FCFS TEST **********************************|
     //-------------------------------------------------------------------------------
         
-        //Calculate the wait times
         for(size_t i = 0; i < jobsVector.size(); ++i)
         {
-            jobsVector[i]._waitingTime = 0;
-            for(size_t j = 0; j < i; j++)
-                jobsVector[i]._waitingTime += jobsVector[j]._burstTime;
+                jobsVector[i]._waitingTime = 0;
+                for(size_t j = 0; j < i; j++)
+                {
+                    jobsVector[i]._waitingTime += jobsVector[j]._burstTime;
+                }
+                if(jobsVector[i]._waitingTime < jobsVector[i]._arrivalTime)
+                    jobsVector[i]._waitingTime = 0;
+                else
+                    jobsVector[i]._waitingTime -= jobsVector[i]._arrivalTime;
+        
         }
         
         if(input == 1)
         {
+            std::cout << "-------------------------------------- FCFS Results --------------------------------------\n\n";
+
+            //Print table header
+            std::cout.flags(std::ios::left);
+            std::cout << std::setw(18) << "Process"
+            << std::setw(18)
+            << "Burst Time"
+            << std::setw(18)
+            << "Priority"
+            << std::setw(18)
+            << "Arrival Time"
+            << std::setw(18)
+            << "Waiting Time"
+            << "\n------------------------------------------------------------------------------------------\n";
+            
             //Print the vectors contents
             for (auto i = jobsVector.begin(); i != jobsVector.end(); ++i)
             {
-                std::cout << i->_processName
-                << std::setw(8)
-                << "\tBurst Time: " << i->_burstTime
-                << std::setw(16)
-                << "\tPriority: " << i->_priority
-                << std::setw(22)
-                << "\tArrival Time: " << i->_arrivalTime
+                std::cout << std::setw(18) << i->_processName
                 << std::setw(18)
-                << "\tWaiting Time: " << i->_waitingTime << std::endl;
+                << i->_burstTime
+                << std::setw(18)
+                << i->_priority
+                << std::setw(18)
+                << i->_arrivalTime
+                << std::setw(18)
+                << i->_waitingTime << std::endl;
             }
+            
             
             //Calculate the average waiting time
             size_t numProcesses = 0;
@@ -146,103 +177,138 @@ int main(int argc, const char * argv[]) {
     //-------------------------------------------------------------------------------
     //****************************** RUN RR TEST ***********************************|
     //-------------------------------------------------------------------------------
-        if(input == 2)
+        
+
+        else if(input == 2)
         {
+            std::cout << "\n\n------------------------------------ RR Results -------------------------------------------\n\n";
             cputimeQuantum = 2;
             
             std::cout << "Quantum Time: " << cputimeQuantum <<"\n\n";
             
-            //Generating random "Jobs"
-            for(size_t i = 0; i < 10; i++)
+            
+            unsigned burstT[RRVector.size()];
+            unsigned arrivalT[RRVector.size()];
+            
+            for(size_t i = 0; i < RRVector.size(); i++)
             {
-                std::string jobName = "P" + std::to_string(i);
-                
-                //jobs.push(Job(jobName, std::rand()%10 , std::rand()%5, time(0) + std::rand()%10));
-                
-                RRVector.push_back(Job(jobName, std::rand()%10 , std::rand()%10, std::rand()%10));
+                burstT[i] = RRVector[i]._burstTime;
+                arrivalT[i] = RRVector[i]._arrivalTime;
             }
             
-            //create burst checker thingy
-            unsigned burstTime[RRVector.size()];
-            for(size_t i = 0; i < RRVector.size(); ++i)
-            {
-                burstTime[i] = RRVector[i]._burstTime;
-            }
-            
-            /*
-            //Calculate the wait time for RR
-            {
-                unsigned time = 0;
-                while(true)
-                {
-                    bool complete = true;
-                    for (size_t i = 0;i < RRVector.size(); i++)
-                    {
-                        if(burstTime[i] > 0)
-                        {
-                            complete = false;
-             
-                            if(burstTime[i] < cputimeQuantum)
-                            {
-                                time = time + burstTime[i];
-                                RRVector[i]._waitingTime = time - burstTime[i];
-                                burstTime[i] = 0;
-                            }
-                            else
-                            {
-                                time += cputimeQuantum;
-                                burstTime[i] -= cputimeQuantum;
-                            }
-                        }
-                    }
-                    if(complete == true)
-                        break;
-                }
-            }
-            */
-            
-            //Calculate the wait times for RR
 
-            int t= 0;
+            int t_total = 0;
             while(true)
             {
                 bool finnished = true;
-                
-                for(int i = 0; i < RRVector.size(); i++)
+                for(size_t i = 0; i < RRVector.size(); i++)
                 {
-                    if(burstTime[i] > 0) //This process has not finnished
+                    // **This job has not arrived yet**
+                    if (arrivalT[i] > t_total)
                     {
-                        finnished = false;
-                        
-                        if(burstTime[i] > cputimeQuantum)
+                        t_total++;
+                        i--;
+                    }
+                    //Process jobs that have arrived
+                    else if (arrivalT[i] <= t_total)
+                    {
+                        if (arrivalT[i] > cputimeQuantum)
                         {
-                            t += cputimeQuantum;
-                            burstTime[i] -= cputimeQuantum;
+                            for (size_t j = 0; j < RRVector.size(); j++)
+                            {
+                                if (arrivalT[j] < arrivalT[i])
+                                {
+                                    if(burstT[j] > 0)
+                                    {
+                                        finnished = false;
+                                        if (burstT[j] > cputimeQuantum)
+                                        {
+                                            t_total = t_total + cputimeQuantum;
+                                            burstT[j] = burstT[j] - cputimeQuantum;
+                                            arrivalT[j] = arrivalT[j] + cputimeQuantum;
+                                        }
+                                        else
+                                        {
+                                            t_total = t_total + burstT[j];
+                                            RRVector[j]._waitingTime = t_total - burstT[j] - arrivalT[j];
+                                            burstT[j] = 0;
+                                        }
+                                    }
+                                }
+                            }
+                            if (burstT[i] > 0)
+                            {
+                                finnished = false;
+                                if (burstT[i] > cputimeQuantum)
+                                {
+                                    t_total = t_total + cputimeQuantum;
+                                    burstT[i] = burstT[i] - cputimeQuantum;
+                                    arrivalT[i] = arrivalT[i] + cputimeQuantum;
+                                }
+                                else
+                                {
+                                    t_total = t_total + burstT[i];
+                                    RRVector[i]._waitingTime = t_total
+                                    - RRVector[i]._burstTime - RRVector[i]._arrivalTime;
+                                    burstT[i] = 0;
+                                }
+                            }
                         }
-                        else
+                        // These jobs can be done because they have arrived during the
+                        // quantums time frame
+                        else if(arrivalT[i] <= cputimeQuantum)
                         {
-                            t = t+ burstTime[i];
-                            RRVector[i]._waitingTime = t - burstTime[i];
-                            burstTime[i] = 0;
+                            if (burstT[i] > 0)
+                            {
+                                finnished = false; // there are more jobs to complete
+                                if(burstT[i] > cputimeQuantum) // This process will not be complete after this iiteration
+                                {
+                                    t_total += cputimeQuantum; //add the quantum duration
+                                    burstT[i] = burstT[i] - cputimeQuantum; // Subtract this cpu quantum from the burtTime remaining
+                                    arrivalT[i] = arrivalT[i] + cputimeQuantum;
+                                }
+                                else
+                                {
+                                    t_total += burstT[i];
+                                    RRVector[i]._waitingTime = t_total - RRVector[i]._burstTime -
+                                    RRVector[i]._arrivalTime;
+                                    burstT[i] = 0;
+                                }
+                            }
                         }
                     }
                 }
-                if(finnished == true)
+                if(finnished)
                     break;
+                
             }
-
+            
+            
+            //Print table header
+            std::cout.flags(std::ios::left);
+            std::cout << std::setw(18) << "Process"
+            << std::setw(18)
+            << "Burst Time"
+            << std::setw(18)
+            << "Priority"
+            << std::setw(18)
+            << "Arrival Time"
+            << std::setw(18)
+            << "Waiting Time"
+            << "\n------------------------------------------------------------------------------------------\n";
+            
             //Print the vectors contents
             for (auto i = RRVector.begin(); i != RRVector.end(); ++i)
             {
-                std::cout << i->_processName
-                << std::setw(8)
-                << "\tBurst Time: " << i->_burstTime
-                << std::setw(16)
-                << "\tPriority: " << i->_priority
-                << std::setw(22)
-                << "\tArrival Time: " << i->_arrivalTime
+                std::cout << std::setw(18) << i->_processName
                 << std::setw(18)
-                << "\tWaiting Time: " << i->_waitingTime << std::endl;
+                << i->_burstTime
+                << std::setw(18)
+                << i->_priority
+                << std::setw(18)
+                << i->_arrivalTime
+                << std::setw(18)
+                << i->_waitingTime << std::endl;
             }
             
             //Calculate the average waiting time
@@ -257,6 +323,8 @@ int main(int argc, const char * argv[]) {
             
             std::cout << "\n\nAverage Wait Time: " << avgRRTime << "\n\n";
         }
+    
+
         if (input == 3)
         {
             runCompare();
