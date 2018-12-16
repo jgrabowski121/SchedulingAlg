@@ -130,51 +130,75 @@ void runCompare(){
 
         std::vector<Job> RR_jobs = jobs;
 
-        cputimeQuantum = 2;
+        std::cout << "\nPlease enter a quantum value (integer):\t";
+    
+    while(true)
+    {
+        while(!(std::cin >> cputimeQuantum))
+        {
+            if (std::cin.eof())
+            {
+                std::cout << "No value enterd\n";
+                break;
+            }
+            if (std::cin.bad())
+            {
+                std::cout<< "Input steam is bad\n";
+                break;
+            }
+            std::cin.clear();
+            std::cin.ignore(1000, '\n');
+            std::cout << "Please enter a valid positive number:\t";
+        }
+        if(cputimeQuantum == 0)
+        {
+            std::cin.clear();
+            std::cin.ignore(1000, '\n');
+            std::cout<< "Please enter a number greater than 0: ";
+        }
+        else
+            break;
+    
+        std::cout << "\n\n";
+    
+    }
         
         std::cout << "Quantum Time: " << cputimeQuantum <<"\n\n";
         outputFile << "Quantum Time: " << cputimeQuantum <<"\n\n";
         
-        //create burst checker thingy
-        int burstTime[RR_jobs.size()];
-        unsigned arrivalTime[RR_jobs.size()];
-        for(size_t i = 0; i < RR_jobs.size(); i++)
-        {
-            burstTime[i] = RR_jobs[i]._burstTime;
-            arrivalTime[i] = RR_jobs[i]._arrivalTime;
-        }
-    
-        int burstT[RR_jobs.size()];
-        unsigned arrivalT[RR_jobs.size()];
-    
-        for(size_t i = 0; i < RR_jobs.size(); i++)
-        {
-            burstT[i] = RR_jobs[i]._burstTime;
-            arrivalT[i] = RR_jobs[i]._arrivalTime;
-        }
+
         //Calculate the wait times for RR
-        
-        int totalTime = 0;
-        std::cout << "Total Time: " << totalTime << "\n\n";
+    
         
        //-------------------------------------------------------
     
-        std::vector<Job> processes = jobs;
     
         //-------------------------------------------------------
 
+
+    //create burst checker thingy
+    std::vector<long long> burstTime;
+    std::vector<unsigned> arrivalTime;
+    for(size_t i = 0; i < RR_jobs.size(); i++)
+    {
+        burstTime.push_back(RR_jobs[i]._burstTime);
+        arrivalTime.push_back( RR_jobs[i]._arrivalTime);
+    }
+    
+    
     int processTime = 0;
     int totalWaitingTime = 0;
     while(true)
     {
         bool done = true;
-        size_t count = RR_jobs.size()-1;
+        bool jobProcessed = false;
+        long long count = RR_jobs.size() -1;
         for(size_t i = 0; i < RR_jobs.size(); i++, count--)
         {
             //If arival_time > processTime
-            if (arrivalTime[i] > processTime)
+            if (arrivalTime[i] > processTime && jobProcessed)
             {
-                if(count == 0) //No jobs were ready
+                if(count < 0) //No jobs were ready
                 {
                     processTime ++; //Increase the time
                     done = false;
@@ -183,22 +207,27 @@ void runCompare(){
                 {
                     done = false;
                 }
-                    //goto next job (i++)
+                //goto next job (i++)
             }
             else if (burstTime[i] > 0)
             {
-                burstTime[i] = burstTime[i] - cputimeQuantum;
-                if (burstTime[i] <= 0)
+                jobProcessed = true;
+                
+                // burstTime[i] = burstTime[i] - cputimeQuantum;
+                if (burstTime[i] <= cputimeQuantum)
                 {
-                    processTime += RR_jobs[i]._burstTime + burstTime[i];
-                    totalRRWaitTime += RR_jobs[i]._burstTime + burstTime[i];
-                    RR_jobs[i]._waitingTime += totalWaitingTime - arrivalTime[i];
+                    processTime +=   cputimeQuantum - burstTime[i];
+                    totalWaitingTime += cputimeQuantum - burstTime[i];
+                    RR_jobs[i]._waitingTime = totalWaitingTime - RR_jobs[i]._burstTime - arrivalTime[i];
+                    burstTime[i] = 0;
+                    
                     if (RR_jobs[i]._waitingTime < 0)
                         RR_jobs[i]._waitingTime = 0;
                 }
                 else
                 {
                     done = false;
+                    burstTime[i] = burstTime[i] - cputimeQuantum;
                     processTime += cputimeQuantum;
                     totalWaitingTime += cputimeQuantum;
                 }
@@ -207,7 +236,6 @@ void runCompare(){
         if(done)
             break;
     }
-
         //--------------------------------
     
         //Print table header
@@ -288,25 +316,37 @@ std::vector<Job> getUsersData(){
     
     //Get users input:
     std::cout << "Enter the number of jobs to test: ";
-    while(!(std::cin>>numJobs))
+    while(true)
     {
-        if(std::cin.eof()||std::cin.bad())
+        while(!(std::cin >> numJobs))
+        {
+            if (std::cin.eof())
+            {
+                std::cout << "No value enterd\n";
+                break;
+            }
+            if (std::cin.bad())
+            {
+                std::cout<< "Input steam is bad\n";
+                break;
+            }
+            std::cin.clear();
+            std::cin.ignore(1000, '\n');
+            std::cout << "Please enter a valid positive number:\t";
+        }
+        if(numJobs == 0)
+        {
+            std::cin.clear();
+            std::cin.ignore(1000, '\n');
+            std::cout<< "Please enter a number greater than 0: ";
+        }
+        else
             break;
         
-        std::cin.clear();
-        std::cin.ignore(1000, '\n');
-        std::cout << "Please enter a valid number:\t";
-    }
-    if (std::cin.eof())
-    {
-        std::cout << "No value enterd\n";
+        std::cout << "\n\n";
         
     }
-    if (std::cin.bad())
-    {
-        std::cout<< "Input steam is bad\n";
-        //Do something
-    }
+    
     
     std::vector<int> arrivalTimes;
     //Generating and sorting arrival times

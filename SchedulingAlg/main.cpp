@@ -49,7 +49,7 @@ int main(int argc, const char * argv[]) {
     {
         std::vector<Job> jobsVector;
         std::vector<Job> RRVector;
-        std::cout << "Welcome to Justin's cpu scheduler from hell\n\n";
+        std::cout << "Welcome to Justin's cpu scheduler!\n\n";
         unsigned short input = 0;
         std::cout << "Please enter your selection (1= FCFS: 2= RR: 3= Compare) or 0 to quit:\t";
         
@@ -84,7 +84,7 @@ int main(int argc, const char * argv[]) {
         unsigned averageWaitTime = 0;
         unsigned totalRRWaitTime = 0;
         unsigned avgRRTime = 0;
-        unsigned cputimeQuantum = 0;
+        int cputimeQuantum = 0;
      
         srand((unsigned)time(0));
 
@@ -108,24 +108,35 @@ int main(int argc, const char * argv[]) {
             
         }
         
+        
+        
         RRVector = jobsVector;
         
+        /*
+         //These are used for whitebox testing
+         
+            RRVector.push_back(Job("P0", 9, 4, 0));
+            RRVector.push_back(Job("P1", 9, 6, 2));
+            RRVector.push_back(Job("P2", 1, 0, 12));
+            RRVector.push_back(Job("P3", 3, 0, 13));
+            RRVector.push_back(Job("P4", 3, 0, 13));
+        */
     //-------------------------------------------------------------------------------
     //***************************** RUN FCFS TEST **********************************|
     //-------------------------------------------------------------------------------
         
+        //Calculate the wait time
         for(size_t i = 0; i < jobsVector.size(); ++i)
         {
+            jobsVector[i]._waitingTime = 0;
+            for(size_t j = 0; j < i; j++)
+            {
+                jobsVector[i]._waitingTime += jobsVector[j]._burstTime;
+            }
+            if(jobsVector[i]._waitingTime < jobsVector[i]._arrivalTime)
                 jobsVector[i]._waitingTime = 0;
-                for(size_t j = 0; j < i; j++)
-                {
-                    jobsVector[i]._waitingTime += jobsVector[j]._burstTime;
-                }
-                if(jobsVector[i]._waitingTime < jobsVector[i]._arrivalTime)
-                    jobsVector[i]._waitingTime = 0;
-                else
-                    jobsVector[i]._waitingTime -= jobsVector[i]._arrivalTime;
-        
+            else
+                jobsVector[i]._waitingTime -= jobsVector[i]._arrivalTime;
         }
         
         if(input == 1)
@@ -181,43 +192,61 @@ int main(int argc, const char * argv[]) {
 
         else if(input == 2)
         {
-            std::cout << "\n\n------------------------------------ RR Results -------------------------------------------\n\n";
-            cputimeQuantum = 2;
+            std::cout << "\nPlease enter a quantum value (integer):\t";
             
+            while(!(std::cin >> cputimeQuantum))
+            {
+                if(std::cin.eof()||std::cin.bad())
+                    break;
+                
+                std::cin.clear();
+                std::cin.ignore(1000, '\n');
+                std::cout << "Please enter a valid number:\t";
+            }
+            if (std::cin.eof())
+            {
+                std::cout << "No value enterd\n";
+                break;
+            }
+            if (std::cin.bad())
+            {
+                std::cout<< "Input steam is bad\n";
+                break;
+            }
+            
+            if (cputimeQuantum <= 0)
+                std::cout << "Please enter an number greater than 0:\nt";
+            std::cout << "\n\n";
+        
+        
             std::cout << "Quantum Time: " << cputimeQuantum <<"\n\n";
             
+            std::cout << "\n\n------------------------------------ RR Results -------------------------------------------\n\n";
+
             
-            unsigned burstT[RRVector.size()];
-            unsigned arrivalT[RRVector.size()];
-            
-            for(size_t i = 0; i < RRVector.size(); i++)
-            {
-                burstT[i] = RRVector[i]._burstTime;
-                arrivalT[i] = RRVector[i]._arrivalTime;
-            }
-            
+          
             //create burst checker thingy
-            int burstTime[RRVector.size()];
-            unsigned arrivalTime[RRVector.size()];
+            std::vector<long long> burstTime;
+            std::vector<unsigned> arrivalTime;
             for(size_t i = 0; i < RRVector.size(); i++)
             {
-                burstTime[i] = RRVector[i]._burstTime;
-                arrivalTime[i] = RRVector[i]._arrivalTime;
+                burstTime.push_back(RRVector[i]._burstTime);
+                arrivalTime.push_back( RRVector[i]._arrivalTime);
             }
-            
             
             int processTime = 0;
             int totalWaitingTime = 0;
             while(true)
             {
                 bool done = true;
-                size_t count = RRVector.size()-1;
-                for(size_t i = 0; i < RRVector.size(); i++, count--)
+                bool jobProcessed = false;
+               // long long count = RRVector.size() -1;
+                for(size_t i = 0; i < RRVector.size(); i++) //, count--)
                 {
                     //If arival_time > processTime
-                    if (arrivalTime[i] > processTime)
+                    if (arrivalTime[i] > processTime && jobProcessed)
                     {
-                        if(count == 0) //No jobs were ready
+                        if(i == RRVector.size()) //No jobs were ready
                         {
                             processTime ++; //Increase the time
                             done = false;
@@ -230,18 +259,23 @@ int main(int argc, const char * argv[]) {
                     }
                     else if (burstTime[i] > 0)
                     {
-                        burstTime[i] = burstTime[i] - cputimeQuantum;
-                        if (burstTime[i] <= 0)
+                        jobProcessed = true;
+        
+                       // burstTime[i] = burstTime[i] - cputimeQuantum;
+                        if (burstTime[i] <= cputimeQuantum)
                         {
-                            processTime += RRVector[i]._burstTime + burstTime[i];
-                            totalRRWaitTime += RRVector[i]._burstTime + burstTime[i];
-                            RRVector[i]._waitingTime += totalWaitingTime - arrivalTime[i];
+                            processTime +=   cputimeQuantum - burstTime[i];
+                            totalWaitingTime += cputimeQuantum - burstTime[i];
+                            RRVector[i]._waitingTime = totalWaitingTime - RRVector[i]._burstTime - arrivalTime[i];
+                            burstTime[i] = 0;
+
                             if (RRVector[i]._waitingTime < 0)
                                 RRVector[i]._waitingTime = 0;
                         }
                         else
                         {
                             done = false;
+                            burstTime[i] = burstTime[i] - cputimeQuantum;
                             processTime += cputimeQuantum;
                             totalWaitingTime += cputimeQuantum;
                         }
