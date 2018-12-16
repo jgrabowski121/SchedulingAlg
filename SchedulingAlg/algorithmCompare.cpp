@@ -48,7 +48,7 @@ void runCompare(){
             FCFS_jobs[i]._waitingTime += FCFS_jobs[j]._burstTime;
         }
         if(FCFS_jobs[i]._waitingTime < FCFS_jobs[i]._arrivalTime)
-            FCFS_jobs[i]._waitingTime = 0;
+            FCFS_jobs[i]._waitingTime = 0; // If a time was negatiev set it to 0
         else
             FCFS_jobs[i]._waitingTime -= FCFS_jobs[i]._arrivalTime;
         
@@ -101,7 +101,6 @@ void runCompare(){
             << i->_arrivalTime
             << std::setw(18)
             << i->_waitingTime << std::endl;
-            
         }
         
         //Calculate the average waiting time
@@ -185,20 +184,18 @@ void runCompare(){
         arrivalTime.push_back( RR_jobs[i]._arrivalTime);
     }
     
-    
     int processTime = 0;
     int totalWaitingTime = 0;
     while(true)
     {
         bool done = true;
         bool jobProcessed = false;
-        long long count = RR_jobs.size() -1;
-        for(size_t i = 0; i < RR_jobs.size(); i++, count--)
+        for(size_t i = 0; i < RR_jobs.size(); i++)
         {
             //If arival_time > processTime
             if (arrivalTime[i] > processTime && jobProcessed)
             {
-                if(count < 0) //No jobs were ready
+                if(i ==  RR_jobs.size() -1) //No jobs were ready
                 {
                     processTime ++; //Increase the time
                     done = false;
@@ -212,8 +209,6 @@ void runCompare(){
             else if (burstTime[i] > 0)
             {
                 jobProcessed = true;
-                
-                // burstTime[i] = burstTime[i] - cputimeQuantum;
                 if (burstTime[i] <= cputimeQuantum)
                 {
                     processTime +=   cputimeQuantum - burstTime[i];
@@ -222,7 +217,7 @@ void runCompare(){
                     burstTime[i] = 0;
                     
                     if (RR_jobs[i]._waitingTime < 0)
-                        RR_jobs[i]._waitingTime = 0;
+                        RR_jobs[i]._waitingTime = 0; // IF a time is negative set to 0
                 }
                 else
                 {
@@ -346,7 +341,6 @@ std::vector<Job> getUsersData(){
         std::cout << "\n\n";
         
     }
-    
     
     std::vector<int> arrivalTimes;
     //Generating and sorting arrival times

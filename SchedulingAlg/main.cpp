@@ -223,7 +223,6 @@ int main(int argc, const char * argv[]) {
             
             std::cout << "\n\n------------------------------------ RR Results -------------------------------------------\n\n";
 
-            
           
             //create burst checker thingy
             std::vector<long long> burstTime;
@@ -240,13 +239,12 @@ int main(int argc, const char * argv[]) {
             {
                 bool done = true;
                 bool jobProcessed = false;
-               // long long count = RRVector.size() -1;
-                for(size_t i = 0; i < RRVector.size(); i++) //, count--)
+                for(size_t i = 0; i < RRVector.size(); i++)
                 {
                     //If arival_time > processTime
                     if (arrivalTime[i] > processTime && jobProcessed)
                     {
-                        if(i == RRVector.size()) //No jobs were ready
+                        if(i == RRVector.size() - 1) //No jobs were ready
                         {
                             processTime ++; //Increase the time
                             done = false;
@@ -255,13 +253,11 @@ int main(int argc, const char * argv[]) {
                         {
                             done = false;
                         }
-                        //goto next job (i++)
+                        //goto next job
                     }
                     else if (burstTime[i] > 0)
                     {
                         jobProcessed = true;
-        
-                       // burstTime[i] = burstTime[i] - cputimeQuantum;
                         if (burstTime[i] <= cputimeQuantum)
                         {
                             processTime +=   cputimeQuantum - burstTime[i];
@@ -270,7 +266,7 @@ int main(int argc, const char * argv[]) {
                             burstTime[i] = 0;
 
                             if (RRVector[i]._waitingTime < 0)
-                                RRVector[i]._waitingTime = 0;
+                                RRVector[i]._waitingTime = 0; // If a wait time is negative set to 0
                         }
                         else
                         {
